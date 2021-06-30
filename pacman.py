@@ -1,31 +1,36 @@
-"""Pacman, classic arcade game.
+"""
 
-Exercises
-
-1. Change the board.
-2. Change the number of ghosts.
-3. Change where pacman starts.
-4. Make the ghosts faster/slower.
-5. Make the ghosts smarter.
+Pacman, classic arcade game.
 
 """
 
+# Librerias que se van a estar usando
 from random import choice
 from turtle import *
 
 from freegames import floor, vector
 
+# Contiene la puntacion hasta el momento
 state = {'score': 0}
+# Turtle que estara dibujando a Pacman y a los fantasmas
 path = Turtle(visible=False)
+# Turtle que escribira mensajes en la pantalla
 writer = Turtle(visible=False)
+# Direccion en la que se estara moviendo el Pacman
 aim = vector(5, 0)
+# Posicion de Pacman
 pacman = vector(-40, -80)
+# Posiciones de los fantasmas con sus respectivas direcciones
 ghosts = [
     [vector(-180, 160), vector(5, 0)],
     [vector(-180, -160), vector(0, 5)],
     [vector(100, 160), vector(0, -5)],
     [vector(100, -160), vector(-5, 0)],
 ]
+# Elemento que representa el tablero:
+# 0 -> no se puede pasar por ahi
+# 1 -> hay comida ahi
+# 2 -> habia comida y ya fue recogida
 # fmt: off
 tiles = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -119,11 +124,15 @@ def move():
 
     clear()
 
+    # Movimiento de Pacman
+    # Revisar si la posicion esta disponible
     if valid(pacman + aim):
         pacman.move(aim)
 
+    # Encontrar a Pacman en su nueva posicion
     index = offset(pacman)
 
+    # Volver a dibujar el cuadro si es que Pacman se come el objeto
     if tiles[index] == 1:
         tiles[index] = 2
         state['score'] += 1
@@ -131,19 +140,27 @@ def move():
         square(x, y)
 
     up()
+    # Posicionar a Pacman en donde se va a dibujar
     goto(pacman.x + 10, pacman.y + 10)
+    # Dibujar a Pacman
     dot(20, 'yellow')
 
+    # Movimiento de los fantasmas
+    # Declaracion de un fantasma
     for point, course in ghosts:
+        # Encontrar la diferencia de distancia del Pacman en "x" y "y"
         dx = point.x - pacman.x
         dy = point.y - pacman.y
+        # Redefinir course si es que encuentra una posicion mas cercana
         if dy == 0:
             course = vector(5 if dx < 0 else -5, 0)
         elif dx == 0:
             course = vector(0, 5 if dy < 0 else -5)
         
+        # Revisar si la posicion sugerida es valida
         if valid(point + course):
             point.move(course)
+        # Si no lo es escoger aleatoriamente una de las dos sobrantes
         else:
             if course.x != 0:
                 op = [vector(0, -5), vector(0, 5)]
@@ -161,13 +178,17 @@ def move():
                     point.move(course)
 
         up()
+        # Posicionar al fantasma en donde se va a dibujar
         goto(point.x + 10, point.y + 10)
+        # Dibujar al fantasma
         dot(20, 'red')
 
     update()
 
+    # Revisar si hay colision entre pacman y un fantasma
     for point, course in ghosts:
         if abs(pacman - point) < 20:
+            # Detener el juego en caso de que choquen
             return
 
     ontimer(move, 100)
