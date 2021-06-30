@@ -10,6 +10,8 @@ from turtle import *
 
 from freegames import floor, vector
 
+# Contador de tiempo
+elapsed = 0
 # Contiene la puntacion hasta el momento
 state = {'score': 0}
 # Turtle que estara dibujando a Pacman y a los fantasmas
@@ -119,25 +121,28 @@ def world():
 
 def move():
     "Move pacman and all ghosts."
-    writer.undo()
-    writer.write(state['score'])
+    global elapsed
+    if elapsed % 80 == 0 or elapsed % 100 == 0:
+        writer.undo()
+        writer.write(state['score'])
 
-    clear()
+        clear()
 
-    # Movimiento de Pacman
-    # Revisar si la posicion esta disponible
-    if valid(pacman + aim):
-        pacman.move(aim)
+    if elapsed % 100 == 0:
+        # Movimiento de Pacman
+        # Revisar si la posicion esta disponible
+        if valid(pacman + aim):
+            pacman.move(aim)
 
-    # Encontrar a Pacman en su nueva posicion
-    index = offset(pacman)
+        # Encontrar a Pacman en su nueva posicion
+        index = offset(pacman)
 
-    # Volver a dibujar el cuadro si es que Pacman se come el objeto
-    if tiles[index] == 1:
-        tiles[index] = 2
-        state['score'] += 1
-        x, y = getCoordinates(index)
-        square(x, y)
+        # Volver a dibujar el cuadro si es que Pacman se come el objeto
+        if tiles[index] == 1:
+            tiles[index] = 2
+            state['score'] += 1
+            x, y = getCoordinates(index)
+            square(x, y)
 
     up()
     # Posicionar a Pacman en donde se va a dibujar
@@ -148,34 +153,35 @@ def move():
     # Movimiento de los fantasmas
     # Declaracion de un fantasma
     for point, course in ghosts:
-        # Encontrar la diferencia de distancia del Pacman en "x" y "y"
-        dx = point.x - pacman.x
-        dy = point.y - pacman.y
-        # Redefinir course si es que encuentra una posicion mas cercana
-        if dy == 0:
-            course = vector(5 if dx < 0 else -5, 0)
-        elif dx == 0:
-            course = vector(0, 5 if dy < 0 else -5)
-        
-        # Revisar si la posicion sugerida es valida
-        if valid(point + course):
-            point.move(course)
-        # Si no lo es escoger aleatoriamente una de las dos sobrantes
-        else:
-            if course.x != 0:
-                op = [vector(0, -5), vector(0, 5)]
-                nextPos = choice(op)
-                course.x = nextPos.x
-                course.y = nextPos.y
-                if valid(point + course):
-                    point.move(course)
+        if elapsed % 80 == 0:
+            # Encontrar la diferencia de distancia del Pacman en "x" y "y"
+            dx = point.x - pacman.x
+            dy = point.y - pacman.y
+            # Redefinir course si es que encuentra una posicion mas cercana
+            if dy == 0:
+                course = vector(5 if dx < 0 else -5, 0)
+            elif dx == 0:
+                course = vector(0, 5 if dy < 0 else -5)
+            
+            # Revisar si la posicion sugerida es valida
+            if valid(point + course):
+                point.move(course)
+            # Si no lo es escoger aleatoriamente una de las dos sobrantes
             else:
-                op = [vector(5, 0), vector(-5, 0)]
-                nextPos = choice(op)
-                course.x = nextPos.x
-                course.y = nextPos.y
-                if valid(point + course):
-                    point.move(course)
+                if course.x != 0:
+                    op = [vector(0, -5), vector(0, 5)]
+                    nextPos = choice(op)
+                    course.x = nextPos.x
+                    course.y = nextPos.y
+                    if valid(point + course):
+                        point.move(course)
+                else:
+                    op = [vector(5, 0), vector(-5, 0)]
+                    nextPos = choice(op)
+                    course.x = nextPos.x
+                    course.y = nextPos.y
+                    if valid(point + course):
+                        point.move(course)
 
         up()
         # Posicionar al fantasma en donde se va a dibujar
@@ -183,7 +189,8 @@ def move():
         # Dibujar al fantasma
         dot(20, 'red')
 
-    update()
+    if elapsed % 80 == 0 or elapsed % 100 == 0:
+        update()
 
     # Revisar si hay colision entre pacman y un fantasma
     for point, course in ghosts:
@@ -191,7 +198,10 @@ def move():
             # Detener el juego en caso de que choquen
             return
 
-    ontimer(move, 100)
+    elapsed += 20
+    if elapsed == 400:
+        elapsed = 0
+    ontimer(move, 20)
 
 
 def change(x, y):
