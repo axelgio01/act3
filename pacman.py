@@ -26,6 +26,8 @@ spdPacman = 100
 spdGhost = 80
 
 
+ghostColors = ['red', 'green', 'orange', 'gray']
+
 # Contiene la puntacion hasta el momento
 state = {'score': 0}
 # Turtle que estara dibujando a Pacman y a los fantasmas
@@ -166,6 +168,7 @@ def move():
 
     # Movimiento de los fantasmas
     # Declaracion de un fantasma
+    it = 0
     for point, course in ghosts:
         if elapsed % spdGhost == 0:
             # Encontrar la diferencia de distancia del Pacman en "x" y "y"
@@ -201,7 +204,8 @@ def move():
         # Posicionar al fantasma en donde se va a dibujar
         goto(point.x + 10, point.y + 10)
         # Dibujar al fantasma
-        dot(20, 'red')
+        dot(20, ghostColors[it])
+        it += 1
 
     if elapsed % spdGhost == 0 or elapsed % spdPacman == 0:
         update()
