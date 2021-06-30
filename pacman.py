@@ -89,6 +89,11 @@ def valid(point):
     return point.x % 20 == 0 or point.y % 20 == 0
 
 
+def getCoordinates(index):
+    "Return coordinates x, y in turtle of a tile given the index"
+    return (index % 20) * 20 - 200, 180 - (index // 20) * 20
+
+
 def world():
     "Draw world using path."
     bgcolor('black')
@@ -98,8 +103,7 @@ def world():
         tile = tiles[index]
 
         if tile > 0:
-            x = (index % 20) * 20 - 200
-            y = 180 - (index // 20) * 20
+            x, y = getCoordinates(index)
             square(x, y)
 
             if tile == 1:
@@ -123,8 +127,7 @@ def move():
     if tiles[index] == 1:
         tiles[index] = 2
         state['score'] += 1
-        x = (index % 20) * 20 - 200
-        y = 180 - (index // 20) * 20
+        x, y = getCoordinates(index)
         square(x, y)
 
     up()
@@ -132,18 +135,30 @@ def move():
     dot(20, 'yellow')
 
     for point, course in ghosts:
+        dx = point.x - pacman.x
+        dy = point.y - pacman.y
+        if dy == 0:
+            course = vector(5 if dx < 0 else -5, 0)
+        elif dx == 0:
+            course = vector(0, 5 if dy < 0 else -5)
+        
         if valid(point + course):
             point.move(course)
         else:
-            options = [
-                vector(5, 0),
-                vector(-5, 0),
-                vector(0, 5),
-                vector(0, -5),
-            ]
-            plan = choice(options)
-            course.x = plan.x
-            course.y = plan.y
+            if course.x != 0:
+                op = [vector(0, -5), vector(0, 5)]
+                nextPos = choice(op)
+                course.x = nextPos.x
+                course.y = nextPos.y
+                if valid(point + course):
+                    point.move(course)
+            else:
+                op = [vector(5, 0), vector(-5, 0)]
+                nextPos = choice(op)
+                course.x = nextPos.x
+                course.y = nextPos.y
+                if valid(point + course):
+                    point.move(course)
 
         up()
         goto(point.x + 10, point.y + 10)
