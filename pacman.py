@@ -10,8 +10,22 @@ from turtle import *
 
 from freegames import floor, vector
 
+# Encontrar el maximo comun divisor de dos numeros
+def gcd(a, b):
+    return gcd(b, a % b) if b > 0 else a
+
+# Encontrar el minimo comun multiplo
+def lcm(a, b):
+    return a / gcd(a, b) * b
+
 # Contador de tiempo
 elapsed = 0
+# Velocidad (arbitraria) del Pacman
+spdPacman = 100
+# Velocidad (arbitraria) de los fantasmas
+spdGhost = 80
+
+
 # Contiene la puntacion hasta el momento
 state = {'score': 0}
 # Turtle que estara dibujando a Pacman y a los fantasmas
@@ -122,13 +136,13 @@ def world():
 def move():
     "Move pacman and all ghosts."
     global elapsed
-    if elapsed % 80 == 0 or elapsed % 100 == 0:
+    if elapsed % spdGhost == 0 or elapsed % spdPacman == 0:
         writer.undo()
         writer.write(state['score'])
 
         clear()
 
-    if elapsed % 100 == 0:
+    if elapsed % spdPacman == 0:
         # Movimiento de Pacman
         # Revisar si la posicion esta disponible
         if valid(pacman + aim):
@@ -153,7 +167,7 @@ def move():
     # Movimiento de los fantasmas
     # Declaracion de un fantasma
     for point, course in ghosts:
-        if elapsed % 80 == 0:
+        if elapsed % spdGhost == 0:
             # Encontrar la diferencia de distancia del Pacman en "x" y "y"
             dx = point.x - pacman.x
             dy = point.y - pacman.y
@@ -189,7 +203,7 @@ def move():
         # Dibujar al fantasma
         dot(20, 'red')
 
-    if elapsed % 80 == 0 or elapsed % 100 == 0:
+    if elapsed % spdGhost == 0 or elapsed % spdPacman == 0:
         update()
 
     # Revisar si hay colision entre pacman y un fantasma
@@ -198,10 +212,10 @@ def move():
             # Detener el juego en caso de que choquen
             return
 
-    elapsed += 20
-    if elapsed == 400:
+    elapsed += gcd(spdPacman, spdGhost)
+    if elapsed == lcm(spdPacman, spdGhost):
         elapsed = 0
-    ontimer(move, 20)
+    ontimer(move, gcd(spdPacman, spdGhost))
 
 
 def change(x, y):
